@@ -1,8 +1,10 @@
+#define LIBCALL_ENABLEINTERRUPT
 #include <Odometry.h>
+#include <EnableInterrupt.h>
 
 //Global Functions
 void rightEncoderAChange();
-void setupPinChangeInterrupt(byte pin);
+void rightEncoderBChange();
 void leftEncoderAChange();
 void leftEncoderBChange();
 
@@ -25,10 +27,10 @@ Odometry::Odometry(byte rightEncoderAPin, byte rightEncoderBPin, byte leftEncode
     digitalWrite(leftEncoderBPin, HIGH);
     rightEncoderCounter = 0.;
     leftEncoderCounter = 0.;
-    attachInterrupt(digitalPinToInterrupt(rightEncoderAPin), rightEncoderAChange, CHANGE);
-    setupPinChangeInterrupt(rightEncoderBPin);
-    attachInterrupt(digitalPinToInterrupt(leftEncoderAPin), leftEncoderAChange, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(leftEncoderBPin), leftEncoderBChange, CHANGE);
+    enableInterrupt(rightEncoderAPin, rightEncoderAChange, CHANGE);
+    enableInterrupt(rightEncoderBPin, rightEncoderBChange, CHANGE);
+    enableInterrupt(leftEncoderAPin, leftEncoderAChange, CHANGE);
+    enableInterrupt(leftEncoderBPin, leftEncoderBChange, CHANGE);
     _rightEncoderAPin = rightEncoderAPin;
     _rightEncoderBPin = rightEncoderBPin;
     _leftEncoderAPin = leftEncoderAPin;
@@ -80,7 +82,7 @@ void rightEncoderAChange() {
     }
 }
 
-ISR (PCINT0_vect) {
+void rightEncoderBChange() {
     bool rightEncoderAStatus = digitalRead(_rightEncoderAPin);
     bool rightEncoderBStatus = digitalRead(_rightEncoderBPin);
     if (((rightEncoderAStatus == HIGH) && (rightEncoderBStatus == HIGH)) || ((rightEncoderAStatus == LOW) && (rightEncoderBStatus == LOW))) {
@@ -111,10 +113,4 @@ void leftEncoderBChange() {
     else {
         leftEncoderCounter--;
     }
-}
-
-void setupPinChangeInterrupt(byte pin) {
-    *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
-    PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
-    PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
 }
