@@ -7,14 +7,15 @@ class Driving
 {
 	public:
 		//Constructors
-		Driving(byte rightSpeedPin, byte rightDirectionA, byte rightDirectionB, byte leftSpeedPin, byte leftDirectionA, byte leftDirectionB);
+		Driving(byte rightSpeedPin, byte rightDirectionA, byte rightDirectionB, byte leftSpeedPin, byte leftDirectionA, byte leftDirectionB, float wheelBase);
 		
 		//Functions
-		void drive(int leftSpeed, int rightSpeed);
-		void stop();
+		void commandVelocity(float linearVelocity, float angularVelocity);
 		
 	private:
-        byte _rightSpeedPin, _rightDirectionA, _rightDirectionB, _leftSpeedPin, _leftDirectionA, _leftDirectionB;
+		void drive(int leftSpeed, int rightSpeed);
+		byte _rightSpeedPin, _rightDirectionA, _rightDirectionB, _leftSpeedPin, _leftDirectionA, _leftDirectionB;
+		float _wheelBase;
 };
 
 #endif

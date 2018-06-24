@@ -54,7 +54,7 @@ int cpr = 3200; //"cycles per revolution" -- number of encoder increments per on
 
 //Serial (USB <--> Intel NUC)
 String rxBuffer;
-unsigned long watchdogTimer = 1000; //fail-safe in case of communication link failure (in ms)
+unsigned long watchdogTimer = 100; //fail-safe in case of communication link failure (in ms)
 unsigned long lastCommTime = 0; //time of last communication from NUC (in ms)
 
 //Ultrasound (Ping))))
@@ -67,7 +67,7 @@ byte rightSignal = 6;
 ////Class Instantiations////
 ////////////////////////////
 
-Driving drive = Driving(rightSpeedPin, rightDirectionA, rightDirectionB, leftSpeedPin, leftDirectionA, leftDirectionB);
+Driving drive = Driving(rightSpeedPin, rightDirectionA, rightDirectionB, leftSpeedPin, leftDirectionA, leftDirectionB, wheelBase);
 L3G gyroscope;
 LSM303 magnetometer_accelerometer;
 LPS pressure;
@@ -104,24 +104,7 @@ void setup()
 void loop() {
   //Prioritize RC commands
   if ((abs(rc.scaledCommand1()) > 0.2 * maxLinearVelocity) || (abs(rc.scaledCommand2()) > 0.2 * maxAngularVelocity)) {
-    float leftSpeed = (rc.scaledCommand1() + (rc.scaledCommand2() * (wheelBase / 2.0)));
-    float rightSpeed = (rc.scaledCommand1() - (rc.scaledCommand2() * (wheelBase / 2.0)));
-
-    if (leftSpeed > 0) {
-      leftSpeed = min(pow(2.0, 2.65 * leftSpeed + 3.6),255);
-    }
-    else if (leftSpeed < 0) {
-      leftSpeed = max(-pow(2.0, 2.65 * abs(leftSpeed) + 3.6),-255);
-    }
-
-    if (rightSpeed > 0) {
-      rightSpeed = min(pow(2.0, 2.65 * rightSpeed + 3.6),255); 
-    }
-    else if (rightSpeed < 0) {
-      rightSpeed = max(-pow(2.0, 2.65 * abs(rightSpeed) + 3.6),-255);
-    }
-    
-    drive.drive((int)leftSpeed, (int)rightSpeed);
+    drive.commandVelocity(rc.scaledCommand1(), rc.scaledCommand2());
     lastCommTime = millis();
   }
   else if (Serial.available()) {
@@ -137,7 +120,7 @@ void loop() {
   }
   
   if (millis() - lastCommTime > watchdogTimer) {
-    drive.stop();
+    drive.commandVelocity(0, 0);
   }
 }
 
@@ -148,12 +131,9 @@ void loop() {
 
 void parse() {
   if (rxBuffer == "v") {
-    int leftSpeed = Serial.parseInt();
-    int rightSpeed = Serial.parseInt();
-    drive.drive(leftSpeed, rightSpeed);
-  }
-  else if (rxBuffer == "s") {
-    drive.stop();
+    float linearVelocity = Serial.parseFloat();
+    float angularVelocity = Serial.parseFloat();
+    drive.commandVelocity(linearVelocity, angularVelocity);
   }
   else if (rxBuffer == "d") {
     Serial.print("IMU,");
