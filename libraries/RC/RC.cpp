@@ -11,7 +11,7 @@ float _scaledCommand1, _scaledCommand2, _scaledCommand3;
 void ISR1(), ISR2(), ISR3();
 
 //Constructor args are pins for linear and angular interrupts
-RC::RC(byte pin1 = 0, float scaleFactor1 = 1, int pin2 = 0, float scaleFactor2 = 1, int pin3 = 0, float scaleFactor3 = 1) {
+RC::RC(byte pin1, float scaleFactor1, int pin2, float scaleFactor2, int pin3, float scaleFactor3) {
     if (pin1 > 0) {
     	enableInterrupt(pin1, ISR1, CHANGE);
     	_pin1 = pin1;
