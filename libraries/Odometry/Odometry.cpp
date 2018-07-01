@@ -49,7 +49,7 @@ void Odometry::update() {
     float leftWheelDistance = ((float)leftEncoderCounter / _cpr) * _wheelDiameter * PI;
     
     //Calculate relative angle that robot has turned
-    float dtheta = (leftWheelDistance - rightWheelDistance) / _wheelBase;
+    float dtheta = (rightWheelDistance - leftWheelDistance) / _wheelBase;
     //Calculate angular velocity
     vtheta = dtheta / (millis() - clock) * 1000;
     //Accumulate angles to calculate absolute heading
