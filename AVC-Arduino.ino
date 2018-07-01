@@ -51,7 +51,7 @@ int cpr = 3200; //"cycles per revolution" -- number of encoder increments per on
 //Serial (USB <--> Intel NUC)
 String rxBuffer;
 unsigned long watchdogTimer = 100; //fail-safe in case of communication link failure (in ms)
-unsigned long lastCommTime = 0; //time of last communication from NUC (in ms)
+unsigned long lastDriveCommandTime = 0; //time of last communication from NUC (in ms)
 
 //Ultrasound (Ping))))
 byte leftSignal = 4;
@@ -99,7 +99,7 @@ void setup()
 void loop() {
   if ((abs(rc.scaledCommand1()) > 0.2 * maxLinearVelocity) || (abs(rc.scaledCommand2()) > 0.2 * maxAngularVelocity)) {
     drive.commandVelocity(rc.scaledCommand1(), rc.scaledCommand2());
-    lastCommTime = millis();
+    lastDriveCommandTime = millis();
   }
 
   if (Serial.available()) {
@@ -107,14 +107,13 @@ void loop() {
     if (c == ',' || c == '\n') {
       parse();
       rxBuffer = "";
-      lastCommTime = millis();
     }
     else if (c > 0) {
       rxBuffer += c;
     }
   }
   
-  if (millis() - lastCommTime > watchdogTimer) {
+  if (millis() - lastDriveCommandTime > watchdogTimer) {
     drive.commandVelocity(0, 0);
   }
 }
@@ -131,6 +130,7 @@ void parse() {
     if (!rc.isActive()) {
       //only respond to drive commands from serial connection if not under RC
       drive.commandVelocity(linearVelocity, angularVelocity);
+      lastDriveCommandTime = millis();
     }
     else {
       //reset RC flag
