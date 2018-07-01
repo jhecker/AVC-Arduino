@@ -11,6 +11,10 @@ class RC
 
                 //Getters
 		float scaledCommand1(), scaledCommand2(), scaledCommand3();
+		bool isActive();
+
+		//Setter
+		void resetActive();
 };
 
 #endif

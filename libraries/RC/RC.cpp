@@ -8,6 +8,7 @@
 byte _pin1, _pin2, _pin3;
 float _scaleFactor1, _scaleFactor2, _scaleFactor3;
 float _scaledCommand1, _scaledCommand2, _scaledCommand3;
+bool activeFlag;
 void ISR1(), ISR2(), ISR3();
 
 //Constructor args are pins for linear and angular interrupts
@@ -27,6 +28,7 @@ RC::RC(byte pin1, float scaleFactor1, int pin2, float scaleFactor2, int pin3, fl
     	_pin3 = pin3;
     	_scaleFactor3 = scaleFactor3; 
     }
+    activeFlag = false;
 }
 
 //Getters
@@ -41,9 +43,18 @@ float RC::scaledCommand2() {
 float RC::scaledCommand3() {
     return _scaledCommand3;
 }
+bool RC::isActive() {
+    return activeFlag;
+}
+
+//Setter
+void RC::resetActive() {
+    activeFlag = false;
+}
 
 //Interrupt service routines (ISRs) for each pin
 void ISR1() {
+    activeFlag = true;
     static unsigned long lastInterruptTime = 0;
     if (digitalRead(_pin1) == HIGH) {
     	lastInterruptTime = micros();
@@ -56,6 +67,7 @@ void ISR1() {
 }
 
 void ISR2() {
+    activeFlag = true;
     static unsigned long lastInterruptTime = 0;
     if (digitalRead(_pin2) == HIGH) {
     	lastInterruptTime = micros();
@@ -68,6 +80,7 @@ void ISR2() {
 }
 
 void ISR3() {
+    activeFlag = true;
     static unsigned long lastInterruptTime = 0;
     if (digitalRead(_pin3) == HIGH) {
     	lastInterruptTime = micros();

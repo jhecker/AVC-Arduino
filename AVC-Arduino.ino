@@ -81,7 +81,6 @@ RC rc = RC(linearPin, maxLinearVelocity, angularPin, maxAngularVelocity);
 void setup()
 {
   Serial.begin(115200);
-  //while (!Serial) {} //wait for Serial to complete initialization before moving on
 
   Wire.begin();
 
@@ -98,12 +97,12 @@ void setup()
 /////////////////
 
 void loop() {
-  //Prioritize RC commands
   if ((abs(rc.scaledCommand1()) > 0.2 * maxLinearVelocity) || (abs(rc.scaledCommand2()) > 0.2 * maxAngularVelocity)) {
     drive.commandVelocity(rc.scaledCommand1(), rc.scaledCommand2());
     lastCommTime = millis();
   }
-  else if (Serial.available()) {
+
+  if (Serial.available()) {
     char c = Serial.read();
     if (c == ',' || c == '\n') {
       parse();
@@ -129,7 +128,14 @@ void parse() {
   if (rxBuffer == "v") {
     float linearVelocity = Serial.parseFloat();
     float angularVelocity = Serial.parseFloat();
-    drive.commandVelocity(linearVelocity, angularVelocity);
+    if (!rc.isActive()) {
+      //only respond to drive commands from serial connection if not under RC
+      drive.commandVelocity(linearVelocity, angularVelocity);
+    }
+    else {
+      //reset RC flag
+      rc.resetActive();
+    }
   }
   else if (rxBuffer == "d") {
     Serial.print("IMU,");
