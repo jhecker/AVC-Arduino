@@ -74,7 +74,7 @@ void Odometry::update() {
 void rightEncoderAChange() {
     bool rightEncoderAStatus = digitalRead(_rightEncoderAPin);
     bool rightEncoderBStatus = digitalRead(_rightEncoderBPin);
-    if (((rightEncoderAStatus == HIGH) && (rightEncoderBStatus == LOW)) || ((rightEncoderAStatus == LOW) && (rightEncoderBStatus == HIGH))) {
+    if (((rightEncoderAStatus == HIGH) && (rightEncoderBStatus == HIGH)) || ((rightEncoderAStatus == LOW) && (rightEncoderBStatus == LOW))) {
         rightEncoderCounter++;
     }
     else {
@@ -85,7 +85,7 @@ void rightEncoderAChange() {
 void rightEncoderBChange() {
     bool rightEncoderAStatus = digitalRead(_rightEncoderAPin);
     bool rightEncoderBStatus = digitalRead(_rightEncoderBPin);
-    if (((rightEncoderAStatus == HIGH) && (rightEncoderBStatus == HIGH)) || ((rightEncoderAStatus == LOW) && (rightEncoderBStatus == LOW))) {
+    if (((rightEncoderAStatus == HIGH) && (rightEncoderBStatus == LOW)) || ((rightEncoderAStatus == LOW) && (rightEncoderBStatus == HIGH))) {
         rightEncoderCounter++;
     }
     else {
@@ -96,7 +96,7 @@ void rightEncoderBChange() {
 void leftEncoderAChange() {
     bool leftEncoderAStatus = digitalRead(_leftEncoderAPin);
     bool leftEncoderBStatus = digitalRead(_leftEncoderBPin);
-    if (((leftEncoderAStatus == HIGH) && (leftEncoderBStatus == HIGH)) || ((leftEncoderAStatus == LOW) && (leftEncoderBStatus == LOW))) {
+    if (((leftEncoderAStatus == HIGH) && (leftEncoderBStatus == LOW)) || ((leftEncoderAStatus == LOW) && (leftEncoderBStatus == HIGH))) {
         leftEncoderCounter++;
     }
     else {
@@ -107,7 +107,7 @@ void leftEncoderAChange() {
 void leftEncoderBChange() {
     bool leftEncoderAStatus = digitalRead(_leftEncoderAPin);
     bool leftEncoderBStatus = digitalRead(_leftEncoderBPin);
-    if (((leftEncoderAStatus == HIGH) && (leftEncoderBStatus == LOW)) || ((leftEncoderAStatus == LOW) && (leftEncoderBStatus == HIGH))) {
+    if (((leftEncoderAStatus == HIGH) && (leftEncoderBStatus == HIGH)) || ((leftEncoderAStatus == LOW) && (leftEncoderBStatus == LOW))) {
         leftEncoderCounter++;
     }
     else {
