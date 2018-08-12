@@ -19,8 +19,8 @@ Driving::Driving(byte rightSpeedPin, byte rightDirectionA, byte rightDirectionB,
 
 //Estimates PWM values for left and right motors given commanded linear and angular velocities
 void Driving::commandVelocity(float linearVelocity, float angularVelocity) {
-    float leftSpeed = (linearVelocity + (angularVelocity * (_wheelBase / 2.0)));
-    float rightSpeed = (linearVelocity - (angularVelocity * (_wheelBase / 2.0)));
+    float leftSpeed = (linearVelocity - (angularVelocity * (_wheelBase / 2.0)));
+    float rightSpeed = (linearVelocity + (angularVelocity * (_wheelBase / 2.0)));
 
     if (leftSpeed > 0) {
       leftSpeed = min(pow(2.0, 2.65 * leftSpeed + 3.6),255);

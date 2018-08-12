@@ -98,7 +98,7 @@ void setup()
 
 void loop() {
   if ((abs(rc.scaledCommand1()) > 0.2 * maxLinearVelocity) || (abs(rc.scaledCommand2()) > 0.2 * maxAngularVelocity)) {
-    drive.commandVelocity(rc.scaledCommand1(), rc.scaledCommand2());
+    drive.commandVelocity(rc.scaledCommand1(), -rc.scaledCommand2());  //negate angular velocity command to match right-hand rule
     lastDriveCommandTime = millis();
   }
 
