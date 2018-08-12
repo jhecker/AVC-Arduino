@@ -63,15 +63,15 @@ byte rightSignal = 6;
 ////Class Instantiations////
 ////////////////////////////
 
-Driving drive = Driving(rightSpeedPin, rightDirectionA, rightDirectionB, leftSpeedPin, leftDirectionA, leftDirectionB, wheelBase);
+Driving drive(rightSpeedPin, rightDirectionA, rightDirectionB, leftSpeedPin, leftDirectionA, leftDirectionB, wheelBase);
 L3G gyroscope;
 LSM303 magnetometer_accelerometer;
 LPS pressure;
 NewPing leftUS(leftSignal, leftSignal, 330);
 NewPing centerUS(centerSignal, centerSignal, 330);
 NewPing rightUS(rightSignal, rightSignal, 330);
-Odometry odom = Odometry(rightEncoderA, rightEncoderB, leftEncoderA, leftEncoderB, wheelBase, wheelDiameter, cpr);
-RC rc = RC(linearPin, maxLinearVelocity, angularPin, maxAngularVelocity);
+Odometry odom(rightEncoderA, rightEncoderB, leftEncoderA, leftEncoderB, wheelBase, wheelDiameter, cpr);
+RC rc(linearPin, maxLinearVelocity, angularPin, maxAngularVelocity);
 
 
 /////////////
