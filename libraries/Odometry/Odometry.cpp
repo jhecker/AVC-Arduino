@@ -47,6 +47,10 @@ void Odometry::update() {
     //Calculate linear distance that each wheel has traveled
     float rightWheelDistance = ((float)rightEncoderCounter / _cpr) * _wheelDiameter * PI;
     float leftWheelDistance = ((float)leftEncoderCounter / _cpr) * _wheelDiameter * PI;
+
+    //Calculate speed
+    vr = rightWheelDistance / (millis() - clock) * 1000;
+    vl = leftWheelDistance / (millis() - clock) * 1000;
     
     //Calculate relative angle that robot has turned
     float dtheta = (rightWheelDistance - leftWheelDistance) / _wheelBase;

@@ -11,6 +11,7 @@
 #include <L3G.h>
 #include <LPS.h>
 #include <LSM303.h>
+#include <PID_v1.h>
 
 //Custom libraries located in AVC-Arduino repo
 #include <Driving.h>
@@ -29,6 +30,13 @@ byte rightSpeedPin = 11; //PWM input
 byte leftDirectionA = A5; //"clockwise" input
 byte leftDirectionB = A4; //"counterclockwise" input
 byte leftSpeedPin = 10; //PWM input
+double rightSpeedMeasured, rightSpeedDesired, rightMotorPwm = 0; //PID variables for right-side motors
+double leftSpeedMeasured, leftSpeedDesired, leftMotorPwm = 0; //PID variables for left-side motors
+float proportionalGain = 100;
+float integralGain = 800;
+float derivativeGain = 0;
+int pidCycleTime = 10; //length of time for one PID cycle in milliseconds
+unsigned long lastPidComputeTime;
 
 //Odometry (3200 CPR Encoder)
 byte rightEncoderA = 7;
@@ -47,10 +55,12 @@ float wheelDiameter = .122; //in m
 float maxLinearVelocity = 1.66; //in m/s
 float maxAngularVelocity = maxLinearVelocity / (wheelBase / 2.0); //in rad/s
 int cpr = 3200; //"cycles per revolution" -- number of encoder increments per one wheel revolution
+inline float rightSkidSteerKinematics(float linearVelocity, float angularVelocity) { return linearVelocity + (angularVelocity * (wheelBase / 2.0)); }
+inline float leftSkidSteerKinematics(float linearVelocity, float angularVelocity) { return linearVelocity - (angularVelocity * (wheelBase / 2.0)); }
 
 //Serial (USB <--> Intel NUC)
 String rxBuffer;
-unsigned long watchdogTimer = 100; //fail-safe in case of communication link failure (in ms)
+unsigned long watchdogTimer = 200; //fail-safe in case of communication link failure (in ms)
 unsigned long lastDriveCommandTime = 0; //time of last communication from NUC (in ms)
 
 //Ultrasound (Ping))))
@@ -63,7 +73,7 @@ byte rightSignal = 6;
 ////Class Instantiations////
 ////////////////////////////
 
-Driving drive(rightSpeedPin, rightDirectionA, rightDirectionB, leftSpeedPin, leftDirectionA, leftDirectionB, wheelBase);
+Driving drive(rightSpeedPin, rightDirectionA, rightDirectionB, leftSpeedPin, leftDirectionA, leftDirectionB);
 L3G gyroscope;
 LSM303 magnetometer_accelerometer;
 LPS pressure;
@@ -71,6 +81,8 @@ NewPing leftUS(leftSignal, leftSignal, 330);
 NewPing centerUS(centerSignal, centerSignal, 330);
 NewPing rightUS(rightSignal, rightSignal, 330);
 Odometry odom(rightEncoderA, rightEncoderB, leftEncoderA, leftEncoderB, wheelBase, wheelDiameter, cpr);
+PID rightMotorPid(&rightSpeedMeasured, &rightMotorPwm, &rightSpeedDesired, proportionalGain, integralGain, derivativeGain, DIRECT);
+PID leftMotorPid(&leftSpeedMeasured, &leftMotorPwm, &leftSpeedDesired, proportionalGain, integralGain, derivativeGain, DIRECT);
 RC rc(linearPin, maxLinearVelocity, angularPin, maxAngularVelocity);
 
 
@@ -89,6 +101,14 @@ void setup()
   }
 
   rxBuffer = "";
+
+  rightMotorPid.SetMode(AUTOMATIC);
+  rightMotorPid.SetOutputLimits(-255, 255);
+  rightMotorPid.SetSampleTime(pidCycleTime);
+  leftMotorPid.SetMode(AUTOMATIC);
+  leftMotorPid.SetOutputLimits(-255, 255);
+  leftMotorPid.SetSampleTime(pidCycleTime);
+  lastPidComputeTime = micros();
 }
 
 
@@ -98,8 +118,20 @@ void setup()
 
 void loop() {
   if ((abs(rc.scaledCommand1()) > 0.2 * maxLinearVelocity) || (abs(rc.scaledCommand2()) > 0.2 * maxAngularVelocity)) {
-    drive.commandVelocity(rc.scaledCommand1(), -rc.scaledCommand2());  //negate angular velocity command to match right-hand rule
+    //negate angular velocity command to match right-hand rule
+    rightSpeedDesired = rightSkidSteerKinematics(rc.scaledCommand1(), -rc.scaledCommand2());
+    leftSpeedDesired = leftSkidSteerKinematics(rc.scaledCommand1(), -rc.scaledCommand2());
     lastDriveCommandTime = millis();
+  }
+
+  if ((micros() - lastPidComputeTime) >= (pidCycleTime * 1000)) {
+    odom.update();
+    rightSpeedMeasured = odom.vr;
+    leftSpeedMeasured = odom.vl;
+    rightMotorPid.Compute();
+    leftMotorPid.Compute();
+    drive.drive(leftMotorPwm, rightMotorPwm);
+    lastPidComputeTime = micros();
   }
 
   if (Serial.available()) {
@@ -114,7 +146,8 @@ void loop() {
   }
   
   if (millis() - lastDriveCommandTime > watchdogTimer) {
-    drive.commandVelocity(0, 0);
+    rightSpeedDesired = leftSpeedDesired = 0;
+    drive.drive(0, 0);
   }
 }
 
@@ -129,7 +162,8 @@ void parse() {
     float angularVelocity = Serial.parseFloat();
     if (!rc.isActive()) {
       //only respond to drive commands from serial connection if not under RC
-      drive.commandVelocity(linearVelocity, angularVelocity);
+      rightSpeedDesired = rightSkidSteerKinematics(linearVelocity, angularVelocity);
+      leftSpeedDesired = leftSkidSteerKinematics(linearVelocity, angularVelocity);
       lastDriveCommandTime = millis();
     }
     else {
@@ -235,7 +269,6 @@ String updateIMU() {
 
 String updateOdom() {
   String txBuffer;
-  odom.update();
 
   txBuffer = String(odom.x) + "," +
              String(odom.y) + "," +

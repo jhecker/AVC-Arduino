@@ -12,6 +12,7 @@ public:
     void update();
     
     //Variables
+    float vr, vl;
     float x, y, theta;
     float vx, vy, vtheta;
     long clock;
