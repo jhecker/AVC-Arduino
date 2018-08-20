@@ -41,22 +41,30 @@ void Driving::commandVelocity(float linearVelocity, float angularVelocity) {
 
 //Sets direction and PWM values for left-side and right-side motors
 void Driving::drive(int leftSpeed, int rightSpeed) {
-    if (leftSpeed >= 0) {
+    if (leftSpeed > 0) {
     	digitalWrite(_leftDirectionA, HIGH);
     	digitalWrite(_leftDirectionB, LOW);
     }
-    else {
+    else if (leftSpeed < 0) {
     	digitalWrite(_leftDirectionA, LOW);
     	digitalWrite(_leftDirectionB, HIGH);
     }
+    else {
+	digitalWrite(_leftDirectionA, LOW);
+	digitalWrite(_leftDirectionB, LOW);
+    }
 
-    if (rightSpeed >= 0) {
+    if (rightSpeed > 0) {
     	digitalWrite(_rightDirectionA, LOW);
     	digitalWrite(_rightDirectionB, HIGH);
     }
-    else {
+    else if (rightSpeed < 0) {
     	digitalWrite(_rightDirectionA, HIGH);
     	digitalWrite(_rightDirectionB, LOW);
+    }
+    else {
+	digitalWrite(_rightDirectionA, LOW);
+	digitalWrite(_rightDirectionB, LOW);
     }
 
     //Set PWM values using speed magnitudes
