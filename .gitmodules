@@ -1,3 +1,18 @@
 [submodule "libraries/PID"]
 	path = libraries/PID
 	url = https://github.com/br3ttb/Arduino-PID-Library
+[submodule "libraries/EnableInterrupt"]
+	path = libraries/EnableInterrupt
+	url = https://github.com/GreyGnome/EnableInterrupt
+[submodule "libraries/NewPing"]
+	path = libraries/NewPing
+	url = https://bitbucket.org/teckel12/arduino-new-ping
+[submodule "libraries/LPS"]
+	path = libraries/LPS
+	url = https://github.com/pololu/lps-arduino
+[submodule "libraries/L3G"]
+	path = libraries/L3G
+	url = https://github.com/pololu/l3g-arduino
+[submodule "libraries/LSM303"]
+	path = libraries/LSM303
+	url = https://github.com/pololu/lsm303-arduino
