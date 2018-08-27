@@ -9,8 +9,10 @@ void leftEncoderAChange();
 void leftEncoderBChange();
 
 //Global Variables
-int rightEncoderCounter;
-int leftEncoderCounter;
+long rightEncoderCounter;
+long leftEncoderCounter;
+long prevRightEncoderCounter;
+long prevLeftEncoderCounter;
 byte _rightEncoderAPin;
 byte _rightEncoderBPin;
 byte _leftEncoderAPin;
@@ -44,32 +46,35 @@ Odometry::Odometry(byte rightEncoderAPin, byte rightEncoderBPin, byte leftEncode
 }
 
 void Odometry::update() {
-    //Calculate linear distance that each wheel has traveled
+    //Update linear distance that each wheel has traveled
     float rightWheelDistance = ((float)rightEncoderCounter / _cpr) * _wheelDiameter * PI;
     float leftWheelDistance = ((float)leftEncoderCounter / _cpr) * _wheelDiameter * PI;
 
-    //Calculate speed
-    vr = rightWheelDistance / (millis() - clock) * 1000;
-    vl = leftWheelDistance / (millis() - clock) * 1000;
-    
-    //Calculate relative angle that robot has turned
-    float dtheta = (rightWheelDistance - leftWheelDistance) / _wheelBase;
-    //Calculate angular velocity
-    vtheta = dtheta / (millis() - clock) * 1000;
-    //Accumulate angles to calculate absolute heading
-    theta += dtheta;
-    
+    //Calculate absolute heading
+    theta = (rightWheelDistance - leftWheelDistance) / _wheelBase;
+
     //Decompose linear distance into its component values
     float meanWheelDistance = (rightWheelDistance + leftWheelDistance) / 2;
-    x = meanWheelDistance * cos(dtheta);
-    y = meanWheelDistance * sin(dtheta);
-    //Calculate linear velocity
-    vx = x / (millis() - clock) * 1000;
-    vy = y / (millis() - clock) * 1000;
+    x = meanWheelDistance * cos(theta);
+    y = meanWheelDistance * sin(theta);
+
+    //Calculate speed
+    vr = (rightEncoderCounter - prevRightEncoderCounter) / (millis() - clock) * 1000;
+    vl = (leftEncoderCounter - prevLeftEncoderCounter) / (millis() - clock) * 1000;
     
-    //Reset counters
-    rightEncoderCounter = 0;
-    leftEncoderCounter = 0;
+    //Calculate relative angle that robot has turned since last update
+    float dtheta = (float)((rightEncoderCounter - prevRightEncoderCounter) - (leftEncoderCounter - prevLeftEncoderCounter)) / _wheelBase;
+
+    //Calculate linear velocity
+    vx = vr * cos(dtheta);
+    vy = vl * sin(dtheta);
+
+    //Calculate angular velocity
+    vtheta = dtheta / (millis() - clock) * 1000;
+    
+    //Store counters
+    prevRightEncoderCounter = rightEncoderCounter;
+    prevLeftEncoderCounter = leftEncoderCounter;
     
     //Reset clock
     clock = millis();
