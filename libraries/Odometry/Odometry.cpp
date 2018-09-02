@@ -11,8 +11,8 @@ void leftEncoderBChange();
 //Global Variables
 long rightEncoderCounter;
 long leftEncoderCounter;
-long prevRightEncoderCounter;
-long prevLeftEncoderCounter;
+float prevRightWheelDistance;
+float prevLeftWheelDistance;
 byte _rightEncoderAPin;
 byte _rightEncoderBPin;
 byte _leftEncoderAPin;
@@ -27,8 +27,10 @@ Odometry::Odometry(byte rightEncoderAPin, byte rightEncoderBPin, byte leftEncode
     pinMode(leftEncoderAPin, INPUT);
     pinMode(leftEncoderBPin, INPUT);
     digitalWrite(leftEncoderBPin, HIGH);
-    rightEncoderCounter = 0.;
-    leftEncoderCounter = 0.;
+    rightEncoderCounter = 0;
+    leftEncoderCounter = 0;
+    prevRightWheelDistance = 0.;
+    prevLeftWheelDistance = 0.;
     enableInterrupt(rightEncoderAPin, rightEncoderAChange, CHANGE);
     enableInterrupt(rightEncoderBPin, rightEncoderBChange, CHANGE);
     enableInterrupt(leftEncoderAPin, leftEncoderAChange, CHANGE);
@@ -59,11 +61,11 @@ void Odometry::update() {
     y = meanWheelDistance * sin(theta);
 
     //Calculate speed
-    vr = (rightEncoderCounter - prevRightEncoderCounter) / (millis() - clock) * 1000;
-    vl = (leftEncoderCounter - prevLeftEncoderCounter) / (millis() - clock) * 1000;
-    
+    vr = (rightWheelDistance - prevRightWheelDistance) / (millis() - clock) * 1000;
+    vl = (leftWheelDistance - prevLeftWheelDistance) / (millis() - clock) * 1000;
+
     //Calculate relative angle that robot has turned since last update
-    float dtheta = (float)((rightEncoderCounter - prevRightEncoderCounter) - (leftEncoderCounter - prevLeftEncoderCounter)) / _wheelBase;
+    float dtheta = (float)((rightWheelDistance - prevRightWheelDistance) - (leftWheelDistance - prevLeftWheelDistance)) / _wheelBase;
 
     //Calculate linear velocity
     vx = vr * cos(dtheta);
@@ -72,11 +74,11 @@ void Odometry::update() {
     //Calculate angular velocity
     vtheta = dtheta / (millis() - clock) * 1000;
     
-    //Store counters
-    prevRightEncoderCounter = rightEncoderCounter;
-    prevLeftEncoderCounter = leftEncoderCounter;
+    //Store distance
+    prevRightWheelDistance = rightWheelDistance;
+    prevLeftWheelDistance = leftWheelDistance;
     
-    //Reset clock
+    //Store clock
     clock = millis();
 }
 
