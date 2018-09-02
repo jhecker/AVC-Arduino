@@ -122,9 +122,14 @@ void loop() {
     rightSpeedDesired = rightSkidSteerKinematics(rc.scaledCommand1(), -rc.scaledCommand2());
     leftSpeedDesired = leftSkidSteerKinematics(rc.scaledCommand1(), -rc.scaledCommand2());
     lastDriveCommandTime = millis();
+    //block drive commands from serial connection while RC is active
+    rc.setActive();
     //enable PIDs to control motor speeds
     rightMotorPid.SetMode(AUTOMATIC);
     leftMotorPid.SetMode(AUTOMATIC);
+  }
+  else if (rc.isActive()) {
+    rc.resetActive();
   }
 
   if ((micros() - lastPidComputeTime) >= (pidCycleTime * 1000)) {
@@ -173,10 +178,6 @@ void parse() {
       //enable PIDs to control motor speeds
       rightMotorPid.SetMode(AUTOMATIC);
       leftMotorPid.SetMode(AUTOMATIC);
-    }
-    else {
-      //reset RC flag
-      rc.resetActive();
     }
   }
   else if (rxBuffer == "d") {

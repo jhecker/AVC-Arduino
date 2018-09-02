@@ -14,7 +14,7 @@ class RC
 		bool isActive();
 
 		//Setter
-		void resetActive();
+		void setActive(), resetActive();
 };
 
 #endif

@@ -47,14 +47,17 @@ bool RC::isActive() {
     return activeFlag;
 }
 
-//Setter
+//Setters
+void RC::setActive() {
+    activeFlag = true;
+}
+
 void RC::resetActive() {
     activeFlag = false;
 }
 
 //Interrupt service routines (ISRs) for each pin
 void ISR1() {
-    activeFlag = true;
     static unsigned long lastInterruptTime = 0;
     if (digitalRead(_pin1) == HIGH) {
     	lastInterruptTime = micros();
@@ -67,7 +70,6 @@ void ISR1() {
 }
 
 void ISR2() {
-    activeFlag = true;
     static unsigned long lastInterruptTime = 0;
     if (digitalRead(_pin2) == HIGH) {
     	lastInterruptTime = micros();
@@ -80,7 +82,6 @@ void ISR2() {
 }
 
 void ISR3() {
-    activeFlag = true;
     static unsigned long lastInterruptTime = 0;
     if (digitalRead(_pin3) == HIGH) {
     	lastInterruptTime = micros();
