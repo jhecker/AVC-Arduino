@@ -47,7 +47,6 @@ byte leftEncoderB = 1;
 //Remote Control (RC)
 byte linearPin = 9;
 byte angularPin = 14;
-float angularScaleFactor = 7;
 
 //Robot Specifications
 float wheelBase = .278; //in m
