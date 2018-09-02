@@ -122,6 +122,9 @@ void loop() {
     rightSpeedDesired = rightSkidSteerKinematics(rc.scaledCommand1(), -rc.scaledCommand2());
     leftSpeedDesired = leftSkidSteerKinematics(rc.scaledCommand1(), -rc.scaledCommand2());
     lastDriveCommandTime = millis();
+    //enable PIDs to control motor speeds
+    rightMotorPid.SetMode(AUTOMATIC);
+    leftMotorPid.SetMode(AUTOMATIC);
   }
 
   if ((micros() - lastPidComputeTime) >= (pidCycleTime * 1000)) {
@@ -146,8 +149,10 @@ void loop() {
   }
   
   if (millis() - lastDriveCommandTime > watchdogTimer) {
-    rightSpeedDesired = leftSpeedDesired = 0;
-    drive.drive(0, 0);
+    //disable PIDs, manually set motor speeds to 0
+    rightMotorPid.SetMode(MANUAL);
+    leftMotorPid.SetMode(MANUAL);
+    rightMotorPwm = leftMotorPwm = 0;
   }
 }
 
@@ -165,6 +170,9 @@ void parse() {
       rightSpeedDesired = rightSkidSteerKinematics(linearVelocity, angularVelocity);
       leftSpeedDesired = leftSkidSteerKinematics(linearVelocity, angularVelocity);
       lastDriveCommandTime = millis();
+      //enable PIDs to control motor speeds
+      rightMotorPid.SetMode(AUTOMATIC);
+      leftMotorPid.SetMode(AUTOMATIC);
     }
     else {
       //reset RC flag
