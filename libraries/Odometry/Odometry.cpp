@@ -13,6 +13,7 @@ long rightEncoderCounter;
 long leftEncoderCounter;
 float prevRightWheelDistance;
 float prevLeftWheelDistance;
+float prevMeanWheelDistance;
 byte _rightEncoderAPin;
 byte _rightEncoderBPin;
 byte _leftEncoderAPin;
@@ -31,6 +32,7 @@ Odometry::Odometry(byte rightEncoderAPin, byte rightEncoderBPin, byte leftEncode
     leftEncoderCounter = 0;
     prevRightWheelDistance = 0.;
     prevLeftWheelDistance = 0.;
+    prevMeanWheelDistance = 0.;
     enableInterrupt(rightEncoderAPin, rightEncoderAChange, CHANGE);
     enableInterrupt(rightEncoderBPin, rightEncoderBChange, CHANGE);
     enableInterrupt(leftEncoderAPin, leftEncoderAChange, CHANGE);
@@ -57,8 +59,8 @@ void Odometry::update() {
 
     //Decompose linear distance into its component values
     float meanWheelDistance = (rightWheelDistance + leftWheelDistance) / 2;
-    x = meanWheelDistance * cos(theta);
-    y = meanWheelDistance * sin(theta);
+    x += (meanWheelDistance - prevMeanWheelDistance) * cos(theta);
+    y += (meanWheelDistance - prevMeanWheelDistance) * sin(theta);
 
     //Calculate speed
     vr = (rightWheelDistance - prevRightWheelDistance) / (millis() - clock) * 1000;
@@ -77,6 +79,7 @@ void Odometry::update() {
     //Store distance
     prevRightWheelDistance = rightWheelDistance;
     prevLeftWheelDistance = leftWheelDistance;
+    prevMeanWheelDistance = meanWheelDistance;
     
     //Store clock
     clock = millis();
